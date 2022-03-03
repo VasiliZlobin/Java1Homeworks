@@ -4,15 +4,17 @@ import java.util.Scanner;
 
 public class HomeWorkApp {
     public static void main(String[] args) {
-        int number1 = InputValues.getIntegerNumber(-1000, 1000);
-        int number2 = InputValues.getIntegerNumber(-1000, 1000);
+        Scanner scanner = new Scanner(System.in);
+        int number1 = InputValues.getIntegerNumber(scanner,-1000, 1000);
+        int number2 = InputValues.getIntegerNumber(scanner, -1000, 1000);
         System.out.printf("%d + %d между 10 и 20: %b\n", number1, number2, checkSumBetweenTenTwenty(number1, number2));
         printSignOfInteger(number1);
         System.out.printf("%d is negative: %b\n", number2, isNegativeNumber(number2));
         printStringInCycle("Сообщение в цикле", 5);
         System.out.println("\nОпределим високосность года");
-        int year = InputValues.getIntegerNumber(0, 10000);
+        int year = InputValues.getIntegerNumber(scanner,0, 10000);
         System.out.printf("Год %d %sявляется високосным", year, isLeapYear(year) ? "" : "не ");
+        scanner.close();
     }
 
     /*
@@ -64,17 +66,15 @@ public class HomeWorkApp {
 }
 
 class InputValues {
-    protected static int getIntegerNumber(int min, int max) {
+    protected static int getIntegerNumber(Scanner scanner, int min, int max) {
         boolean isError = true;
         int result = Integer.MIN_VALUE;
-        Scanner scanner = new Scanner(System.in);
         while (isError)
         {
             System.out.print("Введите число от " + min + " до " + max + ": ");
             result = scanner.nextInt();
             isError = result < min || result > max;
         }
-        scanner.close();
         return result;
     }
 }
