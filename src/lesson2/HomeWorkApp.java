@@ -5,14 +5,14 @@ import java.util.Scanner;
 public class HomeWorkApp {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        int number1 = InputValues.getIntegerNumber(scanner,-1000, 1000);
+        int number1 = InputValues.getIntegerNumber(scanner, -1000, 1000);
         int number2 = InputValues.getIntegerNumber(scanner, -1000, 1000);
         System.out.printf("%d + %d между 10 и 20: %b\n", number1, number2, checkSumBetweenTenTwenty(number1, number2));
         printSignOfInteger(number1);
         System.out.printf("%d is negative: %b\n", number2, isNegativeNumber(number2));
         printStringInCycle("Сообщение в цикле", 5);
         System.out.println("\nОпределим високосность года");
-        int year = InputValues.getIntegerNumber(scanner,0, 10000);
+        int year = InputValues.getIntegerNumber(scanner, 0, 10000);
         System.out.printf("Год %d %sявляется високосным", year, isLeapYear(year) ? "" : "не ");
         scanner.close();
     }
@@ -24,8 +24,7 @@ public class HomeWorkApp {
      */
     private static boolean checkSumBetweenTenTwenty(int firstNumber, int secondNumber) {
         int sum = firstNumber + secondNumber;
-        boolean result = sum >= 10 && sum <= 20;
-        return result;
+        return sum >= 10 && sum <= 20;
     }
 
     /*
@@ -67,13 +66,12 @@ public class HomeWorkApp {
 
 class InputValues {
     protected static int getIntegerNumber(Scanner scanner, int min, int max) {
-        boolean isError = true;
-        int result = Integer.MIN_VALUE;
-        while (isError)
-        {
+        boolean error = true;
+        int result = 0;
+        while (error) {
             System.out.print("Введите число от " + min + " до " + max + ": ");
             result = scanner.nextInt();
-            isError = result < min || result > max;
+            error = result < min || result > max;
         }
         return result;
     }
