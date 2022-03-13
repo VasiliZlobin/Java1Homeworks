@@ -23,7 +23,7 @@ public class HomeWorkApp {
         System.out.println(isExistsEqualsLeftRightSums(numbers));
 
         numbers = new int[]{3, 5, 6, 1, 4, 10};
-        shiftElementsOfArray(numbers, -7);
+        shiftElementsOfArray(numbers, -8);
         System.out.println(Arrays.toString(numbers));
     }
 
@@ -160,10 +160,11 @@ public class HomeWorkApp {
          При каком n в какую сторону сдвиг можете выбирать сами.
      */
     private static void shiftElementsOfArray(int[] array, int step) {
-        // учесть, что количестов шагов больше или равно размеру массива
-        if (step >= array.length) {
+        // учесть, что количестов шагов может быть больше или равно размеру массива
+        if (step >= array.length || step <= -array.length) {
             step %= array.length;
         }
+
         // сдвигать значения на одну позицию влево или вправо, изменяя значение остатка шагов (+ или -)
         int nextMove;
         if (step < 0) {
