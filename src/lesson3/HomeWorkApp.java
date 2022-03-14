@@ -78,7 +78,9 @@ public class HomeWorkApp {
         for (int i = 0; i < size; i++) {
             squareArray[i][i] = 1;
             secondPosition = size - i - 1;
-            squareArray[i][secondPosition] = 1;
+            if (secondPosition != i) {
+                squareArray[i][secondPosition] = 1;
+            }
             for (int j = 0; j < size; j++) {
                 System.out.printf("%d ", squareArray[i][j]);
             }
