@@ -5,16 +5,14 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class lesson4 {
-    private static final int SIZE = 5;
-    private static final int DOTS_FOR_WIN = 4;
+    private static final int SIZE = 9;
+    private static final int DOTS_FOR_WIN = 7;
     private static final char DOT_EMPTY = '•';
     private static final char DOT_X = 'X';
     private static final char DOT_O = 'O';
     private static Scanner scanner = new Scanner(System.in);
     private static Random rand = new Random();
     private static char[][] map;
-    private static int lastCheckX;
-    private static int lastCheckY;
 
     public static void main(String[] args) {
         boolean endGame = false;
@@ -87,7 +85,6 @@ public class lesson4 {
         ArrayList<Integer[]> wins = new ArrayList<>();
         ArrayList<Integer[]> losses = new ArrayList<>();
         ArrayList<Integer[]> others = new ArrayList<>();
-
         // пройти по пустым полям
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -97,13 +94,13 @@ public class lesson4 {
                     pair[1] = j;
                     // проверить потенциальную победу
                     if (isWinLossPositionAi(i, j, true)) {
+                        // выигрышная позиция приоритетна
                         wins.add(pair);
                         break;
                     }
                     // проверить потенциальное поражение для блокировки хода человека
                     if (isWinLossPositionAi(i, j, false)) {
                         losses.add(pair);
-                        break;
                     }
                     others.add(pair);
                 }
@@ -124,8 +121,6 @@ public class lesson4 {
     }
 
     private static boolean isWinLossPositionAi(int x, int y, boolean checkWin) {
-        // сбросить последнюю проверенную позицию
-        lastCheckX = lastCheckY = -1;
         map[x][y] = checkWin ? DOT_O : DOT_X;
         boolean[] lossWin = isWinLossPositionHuman(x, y);
         map[x][y] = DOT_EMPTY;
@@ -135,39 +130,18 @@ public class lesson4 {
     // проверить позицию на выигрыш или проигрыш для игрока-человека
     private static boolean[] isWinLossPositionHuman(int x, int y) {
         boolean[] result = new boolean[]{false, false};
-        boolean[] yetChecks;
-        // исключить повторные проверки
-        if (lastCheckX == -1) {
-            yetChecks = new boolean[4];
-            yetChecks[0] = lastCheckX == x && Math.abs(y - lastCheckY) < DOTS_FOR_WIN;
-            yetChecks[1] = lastCheckY == y && Math.abs(x - lastCheckX) < DOTS_FOR_WIN;
-            yetChecks[2] = x - lastCheckX == y - lastCheckY && Math.abs(y - lastCheckY) < DOTS_FOR_WIN;
-            yetChecks[3] = x - lastCheckX == lastCheckY - y && Math.abs(y - lastCheckY) < DOTS_FOR_WIN;
-        } else {
-            yetChecks = new boolean[]{false, false, false, false};
-            lastCheckX = x;
-            lastCheckY = y;
-        }
-        if (!yetChecks[0]) {
-            // проверить по горизонтали
-            result = checkHorizontal(x, y);
-            lastCheckY = y;
-        }
-        if (!result[0] && !result[1] && !yetChecks[1]) {
+        // проверить по горизонтали
+        result = checkHorizontal(x, y);
+        if (!result[0] && !result[1]) {
             // проверить по вертикали
             result = checkVertical(x, y);
-            lastCheckX = x;
         }
         // проверить по диагоналям
-        if (!result[0] && !result[1] && !yetChecks[2]) {
+        if (!result[0] && !result[1]) {
             result = checkDiagonalLeftToRight(x, y);
-            lastCheckX = x;
-            lastCheckY = y;
         }
-        if (!result[0] && !result[1] && !yetChecks[3]) {
+        if (!result[0] && !result[1]) {
             result = checkDiagonalRightToLeft(x, y);
-            lastCheckX = x;
-            lastCheckY = y;
         }
         return result;
     }
@@ -257,15 +231,15 @@ public class lesson4 {
     // проверить диагональ на уменьшение y справо налево (x++, y--)
     private static boolean[] checkDiagonalRightToLeft(int x, int y) {
         boolean[] result = new boolean[]{false, false};
-        int start = Math.min(x, SIZE - 1 - y);
-        int end = Math.min(SIZE - 1 - x, y);
+        int minStart = Math.min(x, SIZE - 1 - y);
+        int minEnd = Math.min(SIZE - 1 - x, y);
         // начальная позиция для проверки справа сверху по диагонали без выхода за пределы
-        int startX = x - Math.min(start, DOTS_FOR_WIN - 1);
-        int startY = y + Math.min(start, DOTS_FOR_WIN - 1);
-        int endX = x + Math.min(end, DOTS_FOR_WIN - 1);
-        int endY = y - Math.min(end, DOTS_FOR_WIN - 1);
-        endX = endX > SIZE - 1 ? SIZE - 1 : endX;
-        endY = endY < 0 ? 0 : endY;
+        int startX = x - Math.min(minStart, DOTS_FOR_WIN - 1);
+        int startY = y + Math.min(minStart, DOTS_FOR_WIN - 1);
+        int endX = x + Math.min(minEnd, DOTS_FOR_WIN - 1);
+        int endY = y - Math.min(minEnd, DOTS_FOR_WIN - 1);
+        endX = Math.min(endX, SIZE - 1);
+        endY = Math.max(endY, 0);
         while (endX - startX >= DOTS_FOR_WIN - 1 && startY - endY >= DOTS_FOR_WIN - 1) {
             result[0] = true;
             result[1] = true;
@@ -291,8 +265,6 @@ public class lesson4 {
 
     private static boolean checkEndGame() {
         boolean result = false, availableEmpty = false;
-        // сбросить последнюю проверенную позицию
-        lastCheckX = lastCheckY = -1;
         boolean[] winLoss;
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
