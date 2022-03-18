@@ -100,14 +100,15 @@ public class lesson4 {
                     Integer[] pair = new Integer[2];
                     pair[0] = i;
                     pair[1] = j;
-                    // проверить потенциальную победу
+                    // проверить потенциальную победу после количества ходов для победы
                     if (countMoves >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, true)) {
                         // выигрышная позиция приоритетна
                         wins.add(pair);
                         break;
                     }
                     // проверить потенциальное поражение для блокировки хода человека
-                    if (countMoves >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, false)) {
+                    // для следующего хода человека
+                    if (countMoves + 1 >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, false)) {
                         losses.add(pair);
                     } else if (isPriorityPositionAi(i, j)) {
                         priority.add(pair);
