@@ -1,18 +1,21 @@
 package lesson4;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Scanner;
 
 public class lesson4 {
-    private static final int SIZE = 9;
-    private static final int DOTS_FOR_WIN = 7;
+    private static final int SIZE = 5;
+    private static final int DOTS_FOR_WIN = 4;
     private static final char DOT_EMPTY = '•';
     private static final char DOT_X = 'X';
     private static final char DOT_O = 'O';
-    private static Scanner scanner = new Scanner(System.in);
-    private static Random rand = new Random();
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Random rand = new Random();
     private static char[][] map;
+    private static boolean existsEmpty;
+    private static int countMoves = 1;
 
     public static void main(String[] args) {
         boolean endGame = false;
@@ -22,12 +25,18 @@ public class lesson4 {
         while (!endGame) {
             humanTurn();
             printMap();
-            endGame = checkEndGame();
+            if (countMoves >= DOTS_FOR_WIN) {
+                // проверять только после соответствующего количества ходов
+                endGame = checkEndGame();
+            }
             if (!endGame) {
                 aiTurn();
                 printMap();
-                endGame = checkEndGame();
+                if (countMoves >= DOTS_FOR_WIN) {
+                    endGame = checkEndGame();
+                }
             }
+            countMoves++;
         }
         System.out.println("Игра закончена");
     }
@@ -35,9 +44,7 @@ public class lesson4 {
     private static void initMap() {
         map = new char[SIZE][SIZE];
         for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                map[i][j] = DOT_EMPTY;
-            }
+            Arrays.fill(map[i], DOT_EMPTY);
         }
     }
 
@@ -60,7 +67,7 @@ public class lesson4 {
     private static void humanTurn() {
         int x, y;
         do {
-            System.out.print("Введите координаты в формате \"X Y\": ");
+            System.out.print("Введите координаты в формате \"Строка Столбец\": ");
             x = scanner.nextInt() - 1;
             y = scanner.nextInt() - 1;
         } while (!isCellValid(x, y));
@@ -77,13 +84,14 @@ public class lesson4 {
         int position = moves.size() > 1 ? rand.nextInt(moves.size()) : 0;
         selectMove = moves.get(position);
         map[selectMove[0]][selectMove[1]] = DOT_O;
-        System.out.printf("Ход компьютера: %d %d %n", selectMove[0] + 1, selectMove[1] + 1);
+        System.out.printf("Ход компьютера: Строка: %d Столбец: %d %n", selectMove[0] + 1, selectMove[1] + 1);
     }
 
     // получить ходы, не ведущие к явному проигрышу
     private static ArrayList<Integer[]> getMovesWithoutLoss() {
         ArrayList<Integer[]> wins = new ArrayList<>();
         ArrayList<Integer[]> losses = new ArrayList<>();
+        ArrayList<Integer[]> priority = new ArrayList<>();
         ArrayList<Integer[]> others = new ArrayList<>();
         // пройти по пустым полям
         for (int i = 0; i < SIZE; i++) {
@@ -93,16 +101,19 @@ public class lesson4 {
                     pair[0] = i;
                     pair[1] = j;
                     // проверить потенциальную победу
-                    if (isWinLossPositionAi(i, j, true)) {
+                    if (countMoves >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, true)) {
                         // выигрышная позиция приоритетна
                         wins.add(pair);
                         break;
                     }
                     // проверить потенциальное поражение для блокировки хода человека
-                    if (isWinLossPositionAi(i, j, false)) {
+                    if (countMoves >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, false)) {
                         losses.add(pair);
+                    } else if (isPriorityPositionAi(i, j)) {
+                        priority.add(pair);
+                    } else {
+                        others.add(pair);
                     }
-                    others.add(pair);
                 }
             }
             if (wins.size() > 0) {
@@ -114,10 +125,41 @@ public class lesson4 {
             result = wins;
         } else if (losses.size() > 0) {
             result = losses;
+        } else if (priority.size() > 0) {
+            result = priority;
         } else {
             result = others;
         }
         return result;
+    }
+
+    // определить соседство хода игрока-человека
+    private static boolean isPriorityPositionAi(int x, int y) {
+        if (x > 0 && map[x - 1][y] == DOT_X) {
+            return true;
+        }
+        if (x < SIZE - 1 && map[x + 1][y] == DOT_X) {
+            return true;
+        }
+        if (y > 0 && map[x][y - 1] == DOT_X) {
+            return true;
+        }
+        if (y < SIZE - 1 && map[x][y + 1] == DOT_X) {
+            return true;
+        }
+        if (x > 0 && y > 0 && map[x - 1][y - 1] == DOT_X) {
+            return true;
+        }
+        if (x < SIZE - 1 && y < SIZE - 1 && map[x + 1][y + 1] == DOT_X) {
+            return true;
+        }
+        if (x < SIZE - 1 && y > 0 && map[x + 1][y - 1] == DOT_X) {
+            return true;
+        }
+        if (x > 0 && y < SIZE - 1 && map[x - 1][y + 1] == DOT_X) {
+            return true;
+        }
+        return false;
     }
 
     private static boolean isWinLossPositionAi(int x, int y, boolean checkWin) {
@@ -129,7 +171,7 @@ public class lesson4 {
 
     // проверить позицию на выигрыш или проигрыш для игрока-человека
     private static boolean[] isWinLossPositionHuman(int x, int y) {
-        boolean[] result = new boolean[]{false, false};
+        boolean[] result;
         // проверить по горизонтали
         result = checkHorizontal(x, y);
         if (!result[0] && !result[1]) {
@@ -147,7 +189,7 @@ public class lesson4 {
     }
 
     private static boolean[] checkHorizontal(int x, int y) {
-        boolean[] result = new boolean[]{false, false};
+        boolean[] result = new boolean[2];
         int start = y - Math.min(y, DOTS_FOR_WIN - 1);
         int end = y + Math.min(SIZE - 1 - y, DOTS_FOR_WIN - 1);
         // порциями по победному количеству проверить непрерывность равенства символов
@@ -158,6 +200,7 @@ public class lesson4 {
                 if (map[x][i] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
+                    existsEmpty = true;
                     break;
                 }
                 result[0] = result[0] && map[x][i] == DOT_X;
@@ -172,7 +215,7 @@ public class lesson4 {
     }
 
     private static boolean[] checkVertical(int x, int y) {
-        boolean[] result = new boolean[]{false, false};
+        boolean[] result = new boolean[2];
         int start = x - Math.min(x, DOTS_FOR_WIN - 1);
         int end = x + Math.min(SIZE - 1 - x, DOTS_FOR_WIN - 1);
         while (end - start >= DOTS_FOR_WIN - 1) {
@@ -182,6 +225,7 @@ public class lesson4 {
                 if (map[i][y] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
+                    existsEmpty = true;
                     break;
                 }
                 result[0] = result[0] && map[i][y] == DOT_X;
@@ -197,7 +241,7 @@ public class lesson4 {
 
     // проверить диагональ на увеличение y слева направо (x++, y++)
     private static boolean[] checkDiagonalLeftToRight(int x, int y) {
-        boolean[] result = new boolean[]{false, false};
+        boolean[] result = new boolean[2];
         int minStart = Math.min(x, y);
         int minEnd = Math.min(SIZE - 1 - x, SIZE - 1 - y);
         // начальная позиция для проверки слева сверху по диагонали без выхода за пределы
@@ -214,6 +258,7 @@ public class lesson4 {
                 if (map[i][j] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
+                    existsEmpty = true;
                     break;
                 }
                 result[0] = result[0] && map[i][j] == DOT_X;
@@ -249,6 +294,7 @@ public class lesson4 {
                 if (map[i][j] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
+                    existsEmpty = true;
                     break;
                 }
                 result[0] = result[0] && map[i][j] == DOT_X;
@@ -264,32 +310,78 @@ public class lesson4 {
     }
 
     private static boolean checkEndGame() {
-        boolean result = false, availableEmpty = false;
+        boolean result = false;
         boolean[] winLoss;
+        // сбросить показатель наличия свободных позиций
+        existsEmpty = false;
+        winLoss = checkEndHorizontal();
+        if (!winLoss[0] && !winLoss[1]) {
+            winLoss = checkEndVertical();
+        }
+        if (!winLoss[0] && !winLoss[1]) {
+            winLoss = checkEndDiagonal();
+        }
+        if (winLoss[0]) {
+            System.out.println("Победил человек");
+            result = true;
+        } else if (winLoss[1]) {
+            System.out.println("Победил Искусственный Интеллект");
+            result = true;
+        } else if (!existsEmpty) {
+            System.out.println("Ничья");
+            result = true;
+        }
+        return result;
+    }
+
+    private static boolean[] checkEndHorizontal() {
+        boolean[] result = new boolean[2];
         for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                if (map[i][j] == DOT_EMPTY) {
-                    availableEmpty = true;
-                } else {
-                    winLoss = isWinLossPositionHuman(i, j);
-                    if (winLoss[0]) {
-                        System.out.println("Победил человек");
-                    } else if (winLoss[1]) {
-                        System.out.println("Победил Искуственный Интеллект");
-                    }
-                    result = winLoss[0] || winLoss[1];
-                }
-                if (result) {
+            for (int j = 0; j < SIZE; j += DOTS_FOR_WIN) {
+                result = checkHorizontal(i, j);
+                if (result[0] || result[1]) {
                     break;
                 }
             }
-            if (result) {
+            if (result[0] || result[1]) {
                 break;
             }
         }
-        if (!result && !availableEmpty) {
-            System.out.println("Ничья");
-            result = true;
+        return result;
+    }
+
+    private static boolean[] checkEndVertical() {
+        boolean[] result = new boolean[2];
+        for (int i = 0; i < SIZE; i += DOTS_FOR_WIN) {
+            for (int j = 0; j < SIZE; j++) {
+                result = checkVertical(i, j);
+                if (result[0] || result[1]) {
+                    break;
+                }
+            }
+            if (result[0] || result[1]) {
+                break;
+            }
+        }
+        return result;
+    }
+
+    private static boolean[] checkEndDiagonal() {
+        boolean[] result = new boolean[2];
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                result = checkDiagonalLeftToRight(i, j);
+                if (result[0] || result[1]) {
+                    break;
+                }
+                result = checkDiagonalRightToLeft(i, j);
+                if (result[0] || result[1]) {
+                    break;
+                }
+            }
+            if (result[0] || result[1]) {
+                break;
+            }
         }
         return result;
     }
