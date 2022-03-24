@@ -1,9 +1,5 @@
 package lesson5;
 
-enum Positions {
-    CEO, HRM, Accountant, Manager, Driver
-}
-
 public class Employee {
     private static final int MIN_AGE = 18;
     private String fullName;
@@ -67,7 +63,7 @@ public class Employee {
     }
 
     public void setSalary(int salary) {
-        this.salary = Math.min(salary, 0);
+        this.salary = Math.max(salary, 0);
     }
 
     public void showInfo() {
@@ -79,13 +75,11 @@ public class Employee {
         } else {
             System.out.printf("Зарплата: %s%n", salary);
         }
-        if (email.length() > 0) {
+        if (!email.isEmpty()) {
             System.out.printf("Email: %s%n", email);
         }
-        if (telephone.length() > 0) {
+        if (!telephone.isEmpty()) {
             System.out.printf("Телефон: %s%n", telephone);
         }
     }
 }
-
-
