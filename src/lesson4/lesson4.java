@@ -1,9 +1,6 @@
 package lesson4;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 public class lesson4 {
     private static final int SIZE = 5;
@@ -15,22 +12,20 @@ public class lesson4 {
     private static final Random rand = new Random();
     private static char[][] map;
     private static boolean existsEmpty;
-    private static int countMoves = 1;
 
     public static void main(String[] args) {
         boolean endGame = false;
-        // начало
+        int countMoves = 1;// проверять только после соответствующего количества ходов
         initMap();
         printMap();
         while (!endGame) {
             humanTurn();
             printMap();
             if (countMoves >= DOTS_FOR_WIN) {
-                // проверять только после соответствующего количества ходов
                 endGame = checkEndGame();
             }
             if (!endGame) {
-                aiTurn();
+                aiTurn(countMoves);
                 printMap();
                 if (countMoves >= DOTS_FOR_WIN) {
                     endGame = checkEndGame();
@@ -78,9 +73,9 @@ public class lesson4 {
         return x >= 0 && x < SIZE && y >= 0 && y < SIZE && map[x][y] == DOT_EMPTY;
     }
 
-    private static void aiTurn() {
+    private static void aiTurn(int countMoves) {
         Integer[] selectMove;
-        ArrayList<Integer[]> moves = getMovesWithoutLoss();
+        List<Integer[]> moves = getMovesWithoutLoss(countMoves);
         int position = moves.size() > 1 ? rand.nextInt(moves.size()) : 0;
         selectMove = moves.get(position);
         map[selectMove[0]][selectMove[1]] = DOT_O;
@@ -88,27 +83,25 @@ public class lesson4 {
     }
 
     // получить ходы, не ведущие к явному проигрышу
-    private static ArrayList<Integer[]> getMovesWithoutLoss() {
+    private static ArrayList<Integer[]> getMovesWithoutLoss(int countMoves) {
         ArrayList<Integer[]> wins = new ArrayList<>();
-        ArrayList<Integer[]> losses = new ArrayList<>();
         ArrayList<Integer[]> priority = new ArrayList<>();
+        ArrayList<Integer[]> losses = new ArrayList<>();
         ArrayList<Integer[]> others = new ArrayList<>();
         // пройти по пустым полям
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 if (map[i][j] == DOT_EMPTY) {
-                    Integer[] pair = new Integer[2];
-                    pair[0] = i;
-                    pair[1] = j;
+                    Integer[] pair = new Integer[]{i, j};
                     // проверить потенциальную победу после количества ходов для победы
-                    if (countMoves >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, true)) {
+                    if (countMoves >= DOTS_FOR_WIN && checkPositionAi(i, j, DOT_O)) {
                         // выигрышная позиция приоритетна
                         wins.add(pair);
-                        break;
+                        return wins;
                     }
                     // проверить потенциальное поражение для блокировки хода человека
                     // для следующего хода человека
-                    if (countMoves + 1 >= DOTS_FOR_WIN && isWinLossPositionAi(i, j, false)) {
+                    if (countMoves + 1 >= DOTS_FOR_WIN && checkPositionAi(i, j, DOT_X)) {
                         losses.add(pair);
                     } else if (isPriorityPositionAi(i, j)) {
                         priority.add(pair);
@@ -117,21 +110,14 @@ public class lesson4 {
                     }
                 }
             }
-            if (wins.size() > 0) {
-                break;
-            }
         }
-        ArrayList<Integer[]> result;
-        if (wins.size() > 0) {
-            result = wins;
-        } else if (losses.size() > 0) {
-            result = losses;
-        } else if (priority.size() > 0) {
-            result = priority;
-        } else {
-            result = others;
+        if (!losses.isEmpty()) {
+            return losses;
         }
-        return result;
+        if (!priority.isEmpty()) {
+            return priority;
+        }
+        return others;
     }
 
     // определить соседство хода игрока-человека
@@ -163,11 +149,11 @@ public class lesson4 {
         return false;
     }
 
-    private static boolean isWinLossPositionAi(int x, int y, boolean checkWin) {
-        map[x][y] = checkWin ? DOT_O : DOT_X;
+    private static boolean checkPositionAi(int x, int y, char symbol) {
+        map[x][y] = symbol;
         boolean[] lossWin = isWinLossPositionHuman(x, y);
         map[x][y] = DOT_EMPTY;
-        return (lossWin[checkWin ? 1 : 0]);
+        return (lossWin[symbol == DOT_O ? 1 : 0]);
     }
 
     // проверить позицию на выигрыш или проигрыш для игрока-человека
@@ -195,8 +181,7 @@ public class lesson4 {
         int end = y + Math.min(SIZE - 1 - y, DOTS_FOR_WIN - 1);
         // порциями по победному количеству проверить непрерывность равенства символов
         while (end - start >= DOTS_FOR_WIN - 1) {
-            result[0] = true;
-            result[1] = true;
+            result[0] = result[1] = true;
             for (int i = start; i < start + DOTS_FOR_WIN; i++) {
                 if (map[x][i] == DOT_EMPTY) {
                     result[0] = false;
@@ -220,8 +205,7 @@ public class lesson4 {
         int start = x - Math.min(x, DOTS_FOR_WIN - 1);
         int end = x + Math.min(SIZE - 1 - x, DOTS_FOR_WIN - 1);
         while (end - start >= DOTS_FOR_WIN - 1) {
-            result[0] = true;
-            result[1] = true;
+            result[0] = result[1] = true;
             for (int i = start; i < start + DOTS_FOR_WIN; i++) {
                 if (map[i][y] == DOT_EMPTY) {
                     result[0] = false;
@@ -251,11 +235,8 @@ public class lesson4 {
         int endX = x + Math.min(minEnd, DOTS_FOR_WIN - 1);
         int endY = y + Math.min(minEnd, DOTS_FOR_WIN - 1);
         while (endX - startX >= DOTS_FOR_WIN - 1 && endY - startY >= DOTS_FOR_WIN - 1) {
-            result[0] = true;
-            result[1] = true;
-            for (int i = startX, j = startY;
-                 i <= startX + DOTS_FOR_WIN - 1 && j <= startY + DOTS_FOR_WIN - 1;
-                 i++, j++) {
+            result[0] = result[1] = true;
+            for (int i = startX, j = startY; i <= startX + DOTS_FOR_WIN - 1 && j <= startY + DOTS_FOR_WIN - 1; i++, j++) {
                 if (map[i][j] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
@@ -287,11 +268,8 @@ public class lesson4 {
         endX = Math.min(endX, SIZE - 1);
         endY = Math.max(endY, 0);
         while (endX - startX >= DOTS_FOR_WIN - 1 && startY - endY >= DOTS_FOR_WIN - 1) {
-            result[0] = true;
-            result[1] = true;
-            for (int i = startX, j = startY;
-                 i <= startX + DOTS_FOR_WIN - 1 && j >= startY - DOTS_FOR_WIN + 1;
-                 i++, j--) {
+            result[0] = result[1] = true;
+            for (int i = startX, j = startY; i <= startX + DOTS_FOR_WIN - 1 && j >= startY - DOTS_FOR_WIN + 1; i++, j--) {
                 if (map[i][j] == DOT_EMPTY) {
                     result[0] = false;
                     result[1] = false;
