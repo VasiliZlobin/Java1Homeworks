@@ -46,13 +46,13 @@ public class Animal {
         return name + ". Цвет: " + color + ". Возвраст: " + age + ".";
     }
 
-    protected void swim(int distance) {
+    public void swim(int distance) {
         if (distance > 0) {
             System.out.printf("%s проплыл %d метров.%n", name, distance);
         }
     }
 
-    protected void run(int distance) {
+    public void run(int distance) {
         if (distance > 0) {
             System.out.printf("%s пробежал %d метров.%n", name, distance);
         }

@@ -30,7 +30,7 @@ public class Dog extends Animal {
     }
 
     @Override
-    protected void swim(int distance) {
+    public void swim(int distance) {
         if (distance > 0) {
             System.out.print("Собака ");
             super.swim(Math.min(MAX_SWIM, distance));
@@ -38,7 +38,7 @@ public class Dog extends Animal {
     }
 
     @Override
-    protected void run(int distance) {
+    public void run(int distance) {
         if (distance > 0) {
             System.out.print("Собака ");
             super.run(Math.min(MAX_RUN, distance));

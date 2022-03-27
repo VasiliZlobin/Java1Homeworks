@@ -29,12 +29,12 @@ public class Cat extends Animal{
     }
 
     @Override
-    protected void swim(int distance) {
+    public void swim(int distance) {
         System.out.printf("Кот %s не умеет плавать.%n", super.getName());
     }
 
     @Override
-    protected void run(int distance) {
+    public void run(int distance) {
         if (distance > 0) {
             System.out.print("Кот ");
             super.run(Math.min(MAX_RUN, distance));
