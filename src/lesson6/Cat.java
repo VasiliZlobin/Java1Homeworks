@@ -1,6 +1,6 @@
 package lesson6;
 
-public class Cat extends Animal{
+public class Cat extends Animal {
     private static final int MAX_RUN = 200;
     private static int count;
     private CatBreeds breed;
