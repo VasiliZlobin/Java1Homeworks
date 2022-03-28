@@ -31,17 +31,23 @@ public class Dog extends Animal {
 
     @Override
     public void swim(int distance) {
-        if (distance > 0) {
+        if (distance > MAX_SWIM) {
+            System.out.printf("Собака %s не может проплыть %d метров. ", super.getName(), distance);
+            System.out.printf("Максимум %d метров.%n", MAX_SWIM);
+        } else if (distance > 0) {
             System.out.print("Собака ");
-            super.swim(Math.min(MAX_SWIM, distance));
+            super.swim(distance);
         }
     }
 
     @Override
     public void run(int distance) {
-        if (distance > 0) {
+        if (distance > MAX_RUN) {
+            System.out.printf("Собака %$ не может пробежать %d метров. ", super.getName(), distance);
+            System.out.printf("Максимум %d метров.%n", MAX_RUN);
+        } else if (distance > 0) {
             System.out.print("Собака ");
-            super.run(Math.min(MAX_RUN, distance));
+            super.run(distance);
         }
     }
 }

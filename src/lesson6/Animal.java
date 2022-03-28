@@ -1,6 +1,6 @@
 package lesson6;
 
-public class Animal {
+public abstract class Animal {
     private static int count;
     private String name;
     private Colors color;

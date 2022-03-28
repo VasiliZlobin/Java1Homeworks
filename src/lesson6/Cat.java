@@ -35,7 +35,10 @@ public class Cat extends Animal {
 
     @Override
     public void run(int distance) {
-        if (distance > 0) {
+        if (distance > MAX_RUN) {
+            System.out.printf("Кот %s не может пробежать %d метров. ", super.getName(), distance);
+            System.out.printf("Максимум %d метров.%n", MAX_RUN);
+        } else if (distance > 0) {
             System.out.print("Кот ");
             super.run(Math.min(MAX_RUN, distance));
         }

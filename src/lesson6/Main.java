@@ -31,8 +31,10 @@ public class Main {
 
     private static void runActions(Animal animal) {
         System.out.println(animal);
-        animal.run(600);
+        animal.run(400);
         animal.swim(100);
+        animal.run(100);
+        animal.swim(5);
         System.out.println();
     }
 }
